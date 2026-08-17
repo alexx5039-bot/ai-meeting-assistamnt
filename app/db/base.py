@@ -1,6 +1,18 @@
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from datetime import datetime
+from sqlalchemy import DateTime, func
+
+
 
 class Base(DeclarativeBase):
     pass
 
-from app.models import Meeting  # noqa: E402, F401
+
+class BaseModel(Base):
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )

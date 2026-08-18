@@ -1,0 +1,43 @@
+from fastapi import HTTPException, status
+
+from app.schemas.meeting import MeetingCreate
+from app.repositories.meeting import MeetingRepository
+from app.models.meeting import Meeting
+
+class MeetingService:
+
+    def __init__(self, repository: MeetingRepository):
+        self.repository = repository
+
+
+    async def create_meeting(self, data: MeetingCreate, user_id: int) -> Meeting:
+
+        existing = await self.repository.get_by_title(
+            title=data.title,
+            user_id=user_id,
+        )
+
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Meeting with this title already exists",
+            )
+
+        return await self.repository.create(title=data.title, user_id=user_id)
+
+
+    async def get_meeting(self, meeting_id: int, user_id: int) -> Meeting | None:
+        meeting = await self.repository.get_by_id(
+            meeting_id=meeting_id,
+            user_id=user_id
+        )
+        if meeting is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Meeting not found",
+            )
+        return meeting
+
+
+    async def get_user_meetings(self, user_id: int) -> list[Meeting]:
+        return await self.repository.get_by_user(user_id=user_id)

@@ -1,13 +1,20 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 
 from app.schemas.meeting import MeetingCreate
 from app.repositories.meeting import MeetingRepository
 from app.models.meeting import Meeting
 
+from app.services.audio import AudioService
+
+
 class MeetingService:
 
-    def __init__(self, repository: MeetingRepository):
+    def __init__(self,
+                 repository: MeetingRepository,
+                 audio_service: AudioService
+                 ):
         self.repository = repository
+        self.audio_service =audio_service
 
 
     async def create_meeting(self, data: MeetingCreate, user_id: int) -> Meeting:
@@ -41,3 +48,29 @@ class MeetingService:
 
     async def get_user_meetings(self, user_id: int) -> list[Meeting]:
         return await self.repository.get_by_user(user_id=user_id)
+
+
+    async def upload_audio(
+            self,
+            meeting_id: int,
+            user_id: int,
+            file: UploadFile,
+    ) -> Meeting:
+
+        meeting = await self.repository.get_by_id(
+            meeting_id=meeting_id,
+            user_id=user_id,
+        )
+
+        if meeting is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Meeting not found",
+            )
+
+        audio_path = await self.audio_service.save_audio(file)
+
+        return await self.repository.update_audio_path(
+            meeting=meeting,
+            audio_path=audio_path,
+        )

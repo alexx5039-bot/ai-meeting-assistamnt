@@ -25,8 +25,8 @@ class AuthService:
 
         return user
 
-    async def authenticate(self, data: LoginRequest) -> User:
-        user = await self.repository.get_by_email(email=data.email)
+    async def authenticate(self, email: str, password: str) -> User:
+        user = await self.repository.get_by_email(email=email)
 
         if not user:
             raise HTTPException(
@@ -34,7 +34,7 @@ class AuthService:
                 detail="Invalid credentials"
             )
         if not verify_password(
-            data.password,
+            password,
             user.hashed_password
         ):
             raise HTTPException(
@@ -45,10 +45,11 @@ class AuthService:
 
     async def login(
             self,
-            data: LoginRequest,
+            email: str,
+            password: str
     ) -> TokenResponse:
 
-        user = await self.authenticate(data)
+        user = await self.authenticate(email=email, password=password)
 
         access_token = create_access_token(
             data={"sub": str(user.id)}

@@ -1,16 +1,9 @@
 from fastapi import FastAPI
+from app.api.routes.meeting import router as meeting_router
+from app.api.routes.user import router as auth_router
 
-from app.db.database import engine
 
 app = FastAPI(title="AI Meeting Assistant")
 
-
-@app.get("/")
-async def root():
-    return {"message": "AI Meeting Assistant"}
-
-
-@app.get("/health")
-async def health():
-    async with engine.connect():
-        return {"status": "ok"}
+app.include_router(meeting_router, prefix="/meetings", tags=["Meetings"])
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])

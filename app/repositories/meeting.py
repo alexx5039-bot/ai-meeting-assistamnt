@@ -10,7 +10,8 @@ class MeetingRepository:
         meeting = Meeting(title=title, user_id=user_id)
         self.db.add(meeting)
         await self.db.commit()
-        return await self.db.refresh(meeting)
+        await self.db.refresh(meeting)
+        return meeting
 
     async def get_by_id(self, meeting_id, user_id: int) -> Meeting | None:
         stmt = select(Meeting).where(
@@ -29,9 +30,23 @@ class MeetingRepository:
         return result.scalar_one_or_none()
 
     async def get_by_user(self, user_id: int) -> list[Meeting]:
-        stmt = (select(Meeting)
-                .where(Meeting.user_id == user_id)
-                .order_by(Meeting.created_at).desc())
+        stmt = (
+            select(Meeting)
+            .where(Meeting.user_id == user_id)
+            .order_by(Meeting.created_at.desc())
+        )
         result = await self.db.execute(stmt)
         return  list(result.scalars().all())
 
+    async def update_audio_path(
+            self,
+            meeting: Meeting,
+            audio_path: str,
+    ) -> Meeting:
+
+        meeting.audio_path = audio_path
+
+        await self.db.commit()
+        await self.db.refresh(meeting)
+
+        return meeting

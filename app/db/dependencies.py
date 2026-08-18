@@ -9,6 +9,7 @@ from app.models import User
 from app.repositories.meeting import MeetingRepository
 from app.db.database import AsyncSessionLocal
 from app.repositories.user import UserRepository
+from app.services.audio import AudioService
 from app.services.meeting import MeetingService
 from app.services.user import AuthService
 
@@ -25,10 +26,14 @@ async def get_meeting_repository(
 ) -> MeetingRepository:
     return MeetingRepository(db)
 
+async def get_audio_service() -> AudioService:
+    return AudioService()
+
 async def get_meeting_service(
-        repository: MeetingRepository = Depends(get_meeting_repository)
+        repository: MeetingRepository = Depends(get_meeting_repository),
+        audio_service: AudioService = Depends(get_audio_service)
 ) -> MeetingService:
-    return MeetingService(repository)
+    return MeetingService(repository, audio_service)
 
 async def get_user_repository(
         db: AsyncSession = Depends(get_db)
@@ -40,6 +45,9 @@ async def get_user_service(
         repository: UserRepository = Depends(get_user_repository)
 ) -> AuthService:
     return AuthService(repository)
+
+
+
 
 async def get_current_user(
         token: str = Depends(oauth2_scheme),

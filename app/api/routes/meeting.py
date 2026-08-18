@@ -62,3 +62,16 @@ async def upload_audio(
         file=file
     )
 
+@router.post("/{meeting_id}/process",
+             response_model=MeetingResponse,
+             status_code=status.HTTP_200_OK
+             )
+async def process_meeting(
+        meeting_id: int,
+        current_user: User = Depends(get_current_user),
+        service: MeetingService = Depends(get_meeting_service)
+):
+    return await service.process_meeting(
+        meeting_id=meeting_id,
+        user_id=current_user.id,
+    )

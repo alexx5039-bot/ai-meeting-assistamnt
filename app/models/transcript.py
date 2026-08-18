@@ -15,6 +15,7 @@ class Transcript(BaseModel):
         unique=True
     )
     text: Mapped[str] = mapped_column(Text)
+
     meeting: Mapped["Meeting"] = relationship(
         back_populates="transcript"
     )

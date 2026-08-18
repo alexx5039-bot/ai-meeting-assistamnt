@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.meeting import Meeting
+from app.models.enum import MeetingStatus
 
 class MeetingRepository:
     def __init__(self, db: AsyncSession):
@@ -45,6 +46,19 @@ class MeetingRepository:
     ) -> Meeting:
 
         meeting.audio_path = audio_path
+        meeting.status = MeetingStatus.UPLOADED
+
+        await self.db.commit()
+        await self.db.refresh(meeting)
+
+        return meeting
+
+    async def update_status(
+            self,
+            meeting: Meeting,
+            status: MeetingStatus
+    ):
+        meeting.status = status
 
         await self.db.commit()
         await self.db.refresh(meeting)

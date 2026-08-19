@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from app.models.meeting import Meeting
 from app.models.enum import MeetingStatus
 
@@ -64,3 +65,21 @@ class MeetingRepository:
         await self.db.refresh(meeting)
 
         return meeting
+
+    async def get_by_id_with_details(
+            self,
+            meeting_id: int,
+            user_id: int
+    ) -> Meeting | None:
+        result = await self.db.execute(
+            select(Meeting)
+            .options(
+                selectinload(Meeting.transcript),
+                selectinload(Meeting.summary)
+            )
+            .where(
+                Meeting.id == meeting_id,
+                Meeting.user_id == user_id
+            )
+        )
+        return result.scalar_one_or_none()

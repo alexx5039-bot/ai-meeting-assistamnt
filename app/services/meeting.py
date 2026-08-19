@@ -161,6 +161,11 @@ class MeetingService:
                 status=MeetingStatus.COMPLETED,
             )
 
+            meeting = await self.repository.get_by_id_with_details(
+                meeting_id=meeting_id,
+                user_id=user_id,
+            )
+
             return meeting
 
         except Exception:

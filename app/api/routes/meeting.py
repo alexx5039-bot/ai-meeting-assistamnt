@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, UploadFile, File
 
 from app.db.dependencies import get_meeting_service, get_current_user
 from app.models import User
-from app.schemas.meeting import MeetingResponse, MeetingCreate
+from app.schemas.meeting import MeetingResponse, MeetingCreate, MeetingDetailResponse
 from app.services.meeting import MeetingService
 
 router = APIRouter()
@@ -63,7 +63,7 @@ async def upload_audio(
     )
 
 @router.post("/{meeting_id}/process",
-             response_model=MeetingResponse,
+             response_model=MeetingDetailResponse,
              status_code=status.HTTP_200_OK
              )
 async def process_meeting(

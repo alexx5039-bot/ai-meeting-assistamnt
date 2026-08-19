@@ -8,10 +8,13 @@ from app.core.security import decode_token
 from app.models import User
 from app.repositories.meeting import MeetingRepository
 from app.db.database import AsyncSessionLocal
+from app.repositories.summary import SummaryRepository
 from app.repositories.transcript import TranscriptRepository
 from app.repositories.user import UserRepository
 from app.services.audio import AudioService
 from app.services.meeting import MeetingService
+from app.services.summary.base import SummaryService
+from app.services.summary.llm import LLMSummaryService
 from app.services.transcription.base import TranscriptionService
 from app.services.user import AuthService
 from app.services.transcription.whisper import WhisperTranscriptionService
@@ -38,17 +41,29 @@ async def get_transcription_service() -> TranscriptionService:
 async def get_transcript_repository(db: AsyncSession = Depends(get_db)) -> TranscriptRepository:
     return TranscriptRepository(db)
 
+async def get_summary_repository(db: AsyncSession = Depends(get_db)) -> SummaryRepository:
+    return SummaryRepository(db)
+
+async def get_summary_service() -> SummaryService:
+    return LLMSummaryService()
+
+
 async def get_meeting_service(
         repository: MeetingRepository = Depends(get_meeting_repository),
         audio_service: AudioService = Depends(get_audio_service),
         transcription_service: TranscriptionService = Depends(get_transcription_service),
         transcript_repository: TranscriptRepository = Depends(get_transcript_repository),
+        summary_repository: SummaryRepository = Depends(get_summary_repository),
+        summary_service: SummaryService = Depends(get_summary_service),
+
 ) -> MeetingService:
     return MeetingService(
         repository,
         audio_service,
         transcription_service,
-        transcript_repository
+        transcript_repository,
+        summary_repository,
+        summary_service
     )
 
 async def get_user_repository(

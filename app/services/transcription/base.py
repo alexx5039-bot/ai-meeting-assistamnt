@@ -1,7 +1,7 @@
-from abc import ABC, abstractstaticmethod, abstractmethod
+from abc import ABC, abstractmethod
 
 
-class TranscriptionService:
+class TranscriptionService(ABC):
 
     @abstractmethod
     async def transcribe(

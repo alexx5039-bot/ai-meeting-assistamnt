@@ -1,12 +1,14 @@
 from fastapi import HTTPException, status, UploadFile
 
 from app.models.enum import MeetingStatus
+from app.repositories.summary import SummaryRepository
 from app.repositories.transcript import TranscriptRepository
 from app.schemas.meeting import MeetingCreate
 from app.repositories.meeting import MeetingRepository
 from app.models.meeting import Meeting
 
 from app.services.audio import AudioService
+from app.services.summary.base import SummaryService
 from app.services.transcription.base import TranscriptionService
 
 
@@ -17,11 +19,15 @@ class MeetingService:
                  audio_service: AudioService,
                  transcription_service: TranscriptionService,
                  transcript_repository: TranscriptRepository,
+                 summary_repository: SummaryRepository,
+                 summary_service: SummaryService
                  ):
         self.repository = repository
         self.audio_service =audio_service
         self.transcription_service = transcription_service
         self.transcript_repository = transcript_repository
+        self.summary_repository = summary_repository
+        self.summary_service = summary_service
 
 
     async def create_meeting(self, data: MeetingCreate, user_id: int) -> Meeting:
@@ -116,18 +122,50 @@ class MeetingService:
                 detail="Meeting already has a transcript",
             )
 
-        await self.repository.update_status(
-            meeting=meeting,
-            status=MeetingStatus.TRANSCRIBING
-        )
+        try:
+            await self.repository.update_status(
+                meeting=meeting,
+                status=MeetingStatus.TRANSCRIBING
+            )
 
 
-        transcript_text = await self.transcription_service.transcribe(
-            meeting.audio_path
-        )
-        await self.transcript_repository.create(
-            meeting_id=meeting_id,
-            text=transcript_text
-        )
+            transcript_text = await self.transcription_service.transcribe(
+                meeting.audio_path
+            )
+            await self.transcript_repository.create(
+                meeting_id=meeting_id,
+                text=transcript_text
+            )
+            await self.repository.update_status(
+                meeting=meeting,
+                status=MeetingStatus.SUMMARIZING
+            )
+            existing_summary = await self.summary_repository.get_by_meeting(
+                meeting.id
+            )
 
-        return meeting
+            if existing_summary:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Meeting already has a summary",
+                )
+
+            summary_text = await self.summary_service.summarize(transcript_text)
+
+            await self.summary_repository.create(
+                meeting_id=meeting_id,
+                text=summary_text
+            )
+            await self.repository.update_status(
+                meeting=meeting,
+                status=MeetingStatus.COMPLETED,
+            )
+
+            return meeting
+
+        except Exception:
+            await self.repository.update_status(
+                meeting=meeting,
+                status=MeetingStatus.FAILED
+            )
+            raise

@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     upload_dir: Path = Path("uploads/audio")
+    WHISPER_MODEL: str = "tiny"
+    FFMPEG_PATH: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

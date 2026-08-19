@@ -35,8 +35,10 @@ async def get_meeting_repository(
 async def get_audio_service() -> AudioService:
     return AudioService()
 
+_transcription_service = WhisperTranscriptionService()
+
 async def get_transcription_service() -> TranscriptionService:
-    return WhisperTranscriptionService()
+    return _transcription_service
 
 async def get_transcript_repository(db: AsyncSession = Depends(get_db)) -> TranscriptRepository:
     return TranscriptRepository(db)

@@ -2,8 +2,10 @@ from collections.abc import AsyncGenerator
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, oauth2
+from langchain_mistralai import ChatMistralAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.security import decode_token
 from app.models import User
 from app.repositories.meeting import MeetingRepository
@@ -27,6 +29,13 @@ async def get_db() -> AsyncGenerator[AsyncSession | None]:
     async with AsyncSessionLocal() as session:
         yield session
 
+def get_llm():
+    return ChatMistralAI(
+        model="mistral-small-latest",
+        api_key=settings.MISTRAL_API_KEY,
+        temperature=0,
+    )
+
 async def get_meeting_repository(
         db: AsyncSession = Depends(get_db)
 ) -> MeetingRepository:
@@ -46,8 +55,8 @@ async def get_transcript_repository(db: AsyncSession = Depends(get_db)) -> Trans
 async def get_summary_repository(db: AsyncSession = Depends(get_db)) -> SummaryRepository:
     return SummaryRepository(db)
 
-async def get_summary_service() -> SummaryService:
-    return LLMSummaryService()
+async def get_summary_service(llm = Depends(get_llm)) -> SummaryService:
+    return LLMSummaryService(llm=llm)
 
 
 async def get_meeting_service(

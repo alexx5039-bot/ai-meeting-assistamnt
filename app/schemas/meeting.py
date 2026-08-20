@@ -54,3 +54,6 @@ class MeetingDetailResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
     )
+class ProcessingResponse(BaseModel):
+    meeting_id: int
+    status: str

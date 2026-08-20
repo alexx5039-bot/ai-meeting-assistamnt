@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, status, UploadFile, File
 
 from app.db.dependencies import get_meeting_service, get_current_user
 from app.models import User
-from app.schemas.meeting import MeetingResponse, MeetingCreate, MeetingDetailResponse
+from app.schemas.meeting import MeetingResponse, MeetingCreate, MeetingDetailResponse, ProcessingResponse
 from app.services.meeting import MeetingService
-
+from app.worker.tasks import process_meeting_task
 router = APIRouter()
 
 
@@ -24,7 +24,7 @@ async def create_meeting(
 
 @router.get(
     "/{meeting_id}",
-    response_model=MeetingResponse,
+    response_model=MeetingDetailResponse,
     status_code=status.HTTP_200_OK
 )
 async def get_meeting(
@@ -63,15 +63,19 @@ async def upload_audio(
     )
 
 @router.post("/{meeting_id}/process",
-             response_model=MeetingDetailResponse,
-             status_code=status.HTTP_200_OK
+             response_model=ProcessingResponse,
+             status_code=status.HTTP_202_ACCEPTED
              )
 async def process_meeting(
         meeting_id: int,
         current_user: User = Depends(get_current_user),
-        service: MeetingService = Depends(get_meeting_service)
+
 ):
-    return await service.process_meeting(
+    process_meeting_task.delay(
         meeting_id=meeting_id,
         user_id=current_user.id,
     )
+    return {
+        "meeting_id": meeting_id,
+        "status": "processing"
+    }

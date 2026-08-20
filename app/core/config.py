@@ -4,11 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str
+
     postgres_db: str
     postgres_user: str
     postgres_password: str
-    postgres_host: str = "localhost"
+    postgres_host: str = "postgres"
     postgres_port: int = 5432
     MISTRAL_API_KEY: str
     SECRET_KEY: str
@@ -16,7 +16,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     upload_dir: Path = Path("uploads/audio")
     WHISPER_MODEL: str = "tiny"
-    FFMPEG_PATH: str
+    FFMPEG_PATH: str = "ffmpeg"
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -1,4 +1,7 @@
 import asyncio
+
+from fastapi import HTTPException
+
 from app.core.config import settings
 from app.worker.celery_app import celery_app
 
@@ -19,8 +22,15 @@ from app.db.dependencies import get_llm
 
 transcription_service = WhisperTranscriptionService()
 
-@celery_app.task
-def process_meeting_task(meeting_id: int, user_id: int):
+@celery_app.task(
+    bind=True,
+    max_retries=3,
+)
+def process_meeting_task(
+    self,
+    meeting_id: int,
+    user_id: int,
+):
     async def run():
         engine = create_async_engine(
             settings.database_url,
@@ -57,7 +67,18 @@ def process_meeting_task(meeting_id: int, user_id: int):
                     meeting_id=meeting_id,
                     user_id=user_id,
                 )
+
         finally:
             await engine.dispose()
 
-    asyncio.run(run())
+    try:
+        asyncio.run(run())
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+        raise self.retry(
+            exc=exc,
+            countdown=60,
+        )

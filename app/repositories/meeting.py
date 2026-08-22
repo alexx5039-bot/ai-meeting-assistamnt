@@ -1,8 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from app.models.meeting import Meeting
+
 from app.models.enum import MeetingStatus
+from app.models.meeting import Meeting
+
 
 class MeetingRepository:
     def __init__(self, db: AsyncSession):

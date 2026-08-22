@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import BaseModel
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from app.models.meeting import Meeting
@@ -22,7 +22,7 @@ class User(BaseModel):
         String(255),
         nullable=False
     )
-    meetings: Mapped["Meeting"] = relationship(
+    meetings: Mapped[Meeting] = relationship(
         back_populates="user",
         cascade="all, delete-orphan"
     )

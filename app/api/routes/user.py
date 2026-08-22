@@ -1,16 +1,13 @@
 from fastapi import APIRouter, Depends, status
-
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.core.security import password_hash
+from app.db.dependencies import get_user_service
 from app.schemas.auth import (
     RegisterRequest,
-    LoginRequest,
-    TokenResponse, UserResponse,
+    TokenResponse,
+    UserResponse,
 )
 from app.services.user import AuthService
-from app.db.dependencies import get_user_service
-
 
 router = APIRouter()
 

@@ -7,7 +7,6 @@ Create Date: 2026-08-18 14:18:14.404233
 """
 from alembic import op
 
-
 revision: str = '7e9b73f8bff4'
 down_revision: str | None = '47c95ab8d2fd'
 branch_labels = None

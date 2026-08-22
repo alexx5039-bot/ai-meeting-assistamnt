@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, status, UploadFile, File
+from fastapi import APIRouter, Depends, File, UploadFile, status
 
-from app.db.dependencies import get_meeting_service, get_current_user
+from app.db.dependencies import get_current_user, get_meeting_service
 from app.models import User
-from app.schemas.meeting import MeetingResponse, MeetingCreate, MeetingDetailResponse, ProcessingResponse
+from app.schemas.meeting import (
+    MeetingCreate,
+    MeetingDetailResponse,
+    MeetingResponse,
+    ProcessingResponse,
+)
 from app.services.meeting import MeetingService
 from app.worker.tasks import process_meeting_task
+
 router = APIRouter()
 
 

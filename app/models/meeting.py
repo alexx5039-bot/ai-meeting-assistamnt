@@ -1,16 +1,14 @@
-from datetime import datetime
-from sqlalchemy import Enum, ForeignKey
-
-from sqlalchemy import DateTime, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.db.base import Base, BaseModel
-from app.models.enum import MeetingStatus
 from typing import TYPE_CHECKING
 
+from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.base import BaseModel
+from app.models.enum import MeetingStatus
+
 if TYPE_CHECKING:
-    from app.models.transcript import Transcript
     from app.models.summary import Summary
+    from app.models.transcript import Transcript
     from app.models.user import User
 
 
@@ -23,12 +21,12 @@ class Meeting(BaseModel):
         Enum(MeetingStatus),
         default=MeetingStatus.PENDING
     )
-    transcript: Mapped["Transcript"] = relationship(
+    transcript: Mapped[Transcript] = relationship(
         back_populates="meeting",
         uselist=False,
         cascade="all, delete-orphan"
     )
-    summary: Mapped["Summary"] = relationship(
+    summary: Mapped[Summary] = relationship(
         back_populates="meeting",
         uselist=False,
         cascade="all, delete-orphan"

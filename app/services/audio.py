@@ -1,10 +1,9 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import UploadFile, HTTPException, status
+from fastapi import HTTPException, UploadFile, status
 
-from app.core.config import Settings, settings
-
+from app.core.config import settings
 
 ALLOWED_AUDIO_TYPES = {
     "audio/mpeg",

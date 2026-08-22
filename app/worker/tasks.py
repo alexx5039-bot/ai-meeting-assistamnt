@@ -1,24 +1,22 @@
 import asyncio
 
 from fastapi import HTTPException
-
-from app.core.config import settings
-from app.worker.celery_app import celery_app
-
-from app.repositories.meeting import MeetingRepository
-from app.repositories.transcript import TranscriptRepository
-from app.repositories.summary import SummaryRepository
-
-from app.services.meeting import MeetingService
-from app.services.audio import AudioService
-from app.services.transcription.whisper import WhisperTranscriptionService
-from app.services.summary.llm import LLMSummaryService
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+
+from app.core.config import settings
 from app.db.dependencies import get_llm
+from app.repositories.meeting import MeetingRepository
+from app.repositories.summary import SummaryRepository
+from app.repositories.transcript import TranscriptRepository
+from app.services.audio import AudioService
+from app.services.meeting import MeetingService
+from app.services.summary.llm import LLMSummaryService
+from app.services.transcription.whisper import WhisperTranscriptionService
+from app.worker.celery_app import celery_app
 
 transcription_service = WhisperTranscriptionService()
 
@@ -81,4 +79,4 @@ def process_meeting_task(
         raise self.retry(
             exc=exc,
             countdown=60,
-        )
+        ) from exc

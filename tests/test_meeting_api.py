@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 from fastapi.testclient import TestClient
 
-from app.main import app
 from app.api.routes.meeting import get_current_user, get_meeting_service
+from app.main import app
 from app.models.enum import MeetingStatus
 
 client = TestClient(app)
@@ -130,7 +130,7 @@ def test_get_meeting():
     meeting.title = "Test meeting"
     meeting.status = MeetingStatus.PENDING
     meeting.audio_path = None
-    meeting.created_at = datetime.now(timezone.utc)
+    meeting.created_at = datetime.now(UTC)
     meeting.transcript = None
     meeting.summary = None
 

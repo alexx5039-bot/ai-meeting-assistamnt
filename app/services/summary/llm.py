@@ -11,9 +11,11 @@ class LLMSummaryService(SummaryService):
             [
                 (
                     "system",
-                    "You are a meeting assistant. "
-                    "Summarize the meeting transcript concisely. "
-                    "Include key points, decisions, and action items.",
+                    (
+                        "You are a meeting assistant. "
+                        "Summarize the meeting transcript concisely. "
+                        "Include key points, decisions, and action items."
+                    ),
                 ),
                 (
                     "human",

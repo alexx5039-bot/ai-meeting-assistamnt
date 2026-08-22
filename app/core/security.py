@@ -1,8 +1,10 @@
-import datetime
+
+from datetime import UTC, datetime, timedelta
+
+import jwt
 from fastapi import HTTPException, status
 from pwdlib import PasswordHash
-from datetime import datetime, timedelta, timezone
-import jwt
+
 from app.core.config import settings
 
 password_hash = PasswordHash.recommended()
@@ -20,9 +22,9 @@ def create_access_token(
     to_encode = data.copy()
 
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(
+        expire = datetime.now(UTC) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode.update(
@@ -45,8 +47,8 @@ def decode_token(token: str) -> dict:
         )
         return payload
 
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token"
-        )
+        ) from exc

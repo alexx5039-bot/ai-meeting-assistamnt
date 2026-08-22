@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -24,20 +24,19 @@ def test_process_meeting_task_retry():
     with patch(
         "app.worker.tasks.asyncio.run",
         side_effect=error,
-    ):
-        with patch.object(
-            process_meeting_task,
-            "retry",
-            side_effect=Exception("Retry"),
-        ) as mock_retry:
+    ), patch.object(
+        process_meeting_task,
+        "retry",
+        side_effect=Exception("Retry"),
+    ) as mock_retry:
 
-            with pytest.raises(Exception, match="Retry"):
-                process_meeting_task.run(
-                    meeting_id=1,
-                    user_id=1,
-                )
-
-            mock_retry.assert_called_once_with(
-                exc=error,
-                countdown=60,
+        with pytest.raises(Exception, match="Retry"):
+            process_meeting_task.run(
+                meeting_id=1,
+                user_id=1,
             )
+
+        mock_retry.assert_called_once_with(
+            exc=error,
+            countdown=60,
+        )

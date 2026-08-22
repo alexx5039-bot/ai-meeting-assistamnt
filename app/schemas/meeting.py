@@ -1,6 +1,9 @@
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, field_validator
+
 from app.models.enum import MeetingStatus
+
 
 class SummaryResponse(BaseModel):
     id: int

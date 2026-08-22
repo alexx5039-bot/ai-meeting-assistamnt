@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class MeetingStatus(StrEnum):
     PENDING = "pending"
     UPLOADED = "uploaded"

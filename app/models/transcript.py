@@ -1,8 +1,10 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import BaseModel
-from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from app.models.meeting import Meeting
 
@@ -16,6 +18,6 @@ class Transcript(BaseModel):
     )
     text: Mapped[str] = mapped_column(Text)
 
-    meeting: Mapped["Meeting"] = relationship(
+    meeting: Mapped[Meeting] = relationship(
         back_populates="transcript"
     )

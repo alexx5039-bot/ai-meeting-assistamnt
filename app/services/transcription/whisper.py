@@ -1,5 +1,6 @@
 import asyncio
 import os
+
 import whisper
 
 from app.core.config import settings
